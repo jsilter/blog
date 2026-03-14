@@ -1,0 +1,43 @@
+{{- define "main" }}
+
+<article class="post-single">
+  <header class="post-header">
+    <h1 class="post-title">Projects</h1>
+  </header>
+  <div class="post-content">
+
+    <div class="site-section-title">Tools & Libraries</div>
+
+    <div class="site-card-grid">
+      {{ range where .Site.Data.projects.featured "role" "Author" }}
+      <a href="{{ .url }}" target="_blank" rel="noopener" class="site-card">
+        <div class="site-card-header">
+          <span class="site-card-name">{{ .name }}</span>
+          {{ if .stars }}<span class="site-card-badge">&#9733; {{ .stars }}</span>{{ end }}
+          {{ if .new }}<span class="site-card-badge-new">New</span>{{ end }}
+        </div>
+        <p class="site-card-desc">{{ .description }}</p>
+      </a>
+      {{ end }}
+    </div>
+
+    <div class="site-section-title">Open Source Contributions</div>
+
+    <div class="site-card-grid">
+      {{ range .Site.Data.projects.featured }}
+      {{ if ne .role "Author" }}
+      <a href="{{ .url }}" target="_blank" rel="noopener" class="site-card"{{ if eq .category "Structural Biology" }} style="--card-accent: var(--accent-teal);"{{ else if eq .category "Clinical ML" }} style="--card-accent: var(--accent-amber);"{{ end }}>
+        {{ if .category }}<div class="site-card-tag">{{ .category }}</div>{{ end }}
+        <div class="site-card-header">
+          <span class="site-card-name">{{ .name }}</span>
+        </div>
+        <p class="site-card-desc">{{ .description }}</p>
+      </a>
+      {{ end }}
+      {{ end }}
+    </div>
+
+  </div>
+</article>
+
+{{- end }}

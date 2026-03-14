@@ -1,0 +1,47 @@
+- name: "Boltz"
+  description: "Protein structure prediction, enabling accurate 3D modeling of protein conformations."
+  role: "Deployment & integration"
+  category: "Structural Biology"
+  url: "https://github.com/jwohlwend/boltz"
+  featured: true
+
+- name: "DiffDock"
+  description: "Molecular docking using diffusion generative models for predicting ligand binding poses."
+  role: "Deployment & integration"
+  category: "Structural Biology"
+  url: "https://github.com/gcorso/DiffDock"
+  featured: true
+
+- name: "Parametric DR"
+  description: "PyTorch library for parametric dimensionality reduction: t-SNE, UMAP, PaCMAP, TriMap, and CEBRA under a single API."
+  role: "Author"
+  url: "https://github.com/jsilter/parametric_dr"
+  new: true
+  featured: true
+
+- name: "Parametric t-SNE"
+  description: "Python/TensorFlow/Keras implementation of parametric t-SNE for dimensionality reduction."
+  role: "Author"
+  url: "https://github.com/jsilter/parametric_tsne"
+  stars: "162"
+  featured: true
+
+- name: "Sybil"
+  description: "Lung cancer risk prediction from low-dose CT scans (MIT Barzilay group)."
+  role: "Deployment & integration"
+  category: "Clinical ML"
+  url: "https://github.com/reginabarzilaygroup/Sybil"
+  featured: true
+
+- name: "Mirai"
+  description: "Breast cancer risk prediction from mammography (MIT Barzilay group)."
+  role: "Deployment & integration"
+  category: "Clinical ML"
+  url: "https://github.com/reginabarzilaygroup/Mirai"
+  featured: true
+
+- name: "SciPy"
+  description: "Contributions to the scientific Python ecosystem."
+  role: "Contributor"
+  url: "https://github.com/scipy/scipy"
+  featured: false

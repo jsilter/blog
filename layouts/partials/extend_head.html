@@ -1,0 +1,373 @@
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,300;0,6..72,400;0,6..72,500;1,6..72,300;1,6..72,400&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+<style>
+/* ── Site-wide accent system ── */
+:root {
+  --accent: #B45A2B;
+  --accent-soft: rgba(180, 90, 43, 0.08);
+  --accent-teal: #2A7B9B;
+  --accent-amber: #9B6B2A;
+  --theme: #fff;
+  --entry: #fff;
+  --primary: rgb(30, 30, 30);
+  --secondary: rgb(90, 90, 90);
+  --tertiary: rgb(214, 214, 214);
+  --content: rgb(31, 31, 31);
+  --border: rgb(230, 230, 230);
+}
+
+:root[data-theme="dark"] {
+  --accent: #D4845A;
+  --accent-soft: rgba(212, 132, 90, 0.1);
+  --accent-teal: #4BA8C8;
+  --accent-amber: #C89B5A;
+  --theme: rgb(22, 22, 24);
+  --entry: rgb(32, 32, 36);
+  --primary: rgb(230, 230, 230);
+  --secondary: rgb(160, 160, 165);
+  --tertiary: rgb(55, 55, 60);
+  --content: rgb(210, 210, 212);
+  --border: rgb(50, 50, 55);
+}
+
+body {
+  background: var(--theme);
+}
+
+/* ── Links ── */
+.post-content a {
+  color: var(--accent);
+  text-decoration-color: var(--accent-soft);
+  text-underline-offset: 2px;
+  transition: text-decoration-color 0.2s;
+}
+
+.post-content a:hover {
+  text-decoration-color: var(--accent);
+}
+
+/* ── Tags ── */
+.post-tags a,
+.terms-tags a {
+  background: var(--accent-soft) !important;
+  color: var(--accent) !important;
+  border: 1px solid transparent !important;
+  border-radius: 99px !important;
+  font-family: 'Outfit', sans-serif;
+  font-size: 0.75rem;
+  font-weight: 500;
+  letter-spacing: 0.03em;
+  padding: 0.2rem 0.75rem !important;
+  text-decoration: none !important;
+  transition: background 0.2s, border-color 0.2s;
+}
+
+.post-tags a:hover,
+.terms-tags a:hover {
+  border-color: var(--accent) !important;
+  background: rgba(180, 90, 43, 0.15) !important;
+}
+
+[data-theme="dark"] .post-tags a:hover,
+[data-theme="dark"] .terms-tags a:hover {
+  background: rgba(212, 132, 90, 0.2) !important;
+}
+
+/* ── Blockquotes ── */
+blockquote {
+  border-left: 3px solid var(--accent) !important;
+}
+
+/* ── Navigation ── */
+.nav #menu a {
+  transition: color 0.2s;
+}
+
+.nav #menu a:hover {
+  color: var(--accent) !important;
+}
+
+.nav #menu .active {
+  color: var(--accent);
+}
+
+.logo a {
+  transition: color 0.2s;
+}
+
+.logo a:hover {
+  color: var(--accent) !important;
+}
+
+/* ── Home page ── */
+.home-info {
+  border: 1px solid var(--tertiary, #e0ddd8);
+  border-left: 4px solid var(--accent);
+  border-radius: 10px;
+  padding: 2rem 2.5rem;
+}
+
+.home-info .entry-content p {
+  color: var(--primary);
+}
+
+.home-info .entry-header h1 {
+  font-family: 'Outfit', sans-serif;
+}
+
+.home-info .entry-content a {
+  color: var(--accent);
+  text-decoration-color: var(--accent-soft);
+  text-underline-offset: 2px;
+  transition: text-decoration-color 0.2s;
+}
+
+.home-info .entry-content a:hover {
+  text-decoration-color: var(--accent);
+}
+
+.home-info .social-icons a {
+  transition: color 0.2s;
+}
+
+.home-info .social-icons a:hover {
+  color: var(--accent) !important;
+}
+
+/* ── Post list entries (blog page) ── */
+.post-entry {
+  border: 1px solid var(--tertiary, #e0ddd8);
+  border-radius: 10px;
+  position: relative;
+  overflow: hidden;
+  transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+}
+
+.post-entry::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 3.5px;
+  height: 100%;
+  background: var(--accent);
+  border-radius: 10px 0 0 10px;
+}
+
+.post-entry:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 16px rgba(0,0,0,0.06);
+  border-color: var(--accent);
+}
+
+[data-theme="dark"] .post-entry:hover {
+  box-shadow: 0 4px 16px rgba(0,0,0,0.25);
+}
+
+.post-entry .entry-header h2 {
+  transition: color 0.2s;
+}
+
+.post-entry:hover .entry-header h2 {
+  color: var(--accent);
+}
+
+/* ── Section title (reusable) ── */
+.site-section-title {
+  font-family: 'Outfit', sans-serif;
+  font-weight: 600;
+  font-size: 0.7rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin: 2.5rem 0 1.25rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.site-section-title::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--tertiary, #e0ddd8);
+}
+
+/* ── Shared card system ── */
+.site-card-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.875rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+@media (max-width: 600px) {
+  .site-card-grid { grid-template-columns: 1fr; }
+}
+
+.site-card {
+  background: var(--entry, #f8f7f4);
+  border: 1px solid var(--tertiary, #e0ddd8);
+  border-radius: 10px;
+  padding: 1.25rem;
+  position: relative;
+  overflow: hidden;
+  text-decoration: none !important;
+  display: block;
+  color: inherit !important;
+  transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+  opacity: 0;
+  animation: siteCardIn 0.5s ease forwards;
+}
+
+.site-card:visited { color: inherit !important; }
+
+.site-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 3.5px;
+  height: 100%;
+  background: var(--card-accent, var(--accent));
+  border-radius: 10px 0 0 10px;
+}
+
+.site-card:nth-child(1) { animation-delay: 0.05s; }
+.site-card:nth-child(2) { animation-delay: 0.1s; }
+.site-card:nth-child(3) { animation-delay: 0.15s; }
+.site-card:nth-child(4) { animation-delay: 0.2s; }
+.site-card:nth-child(5) { animation-delay: 0.25s; }
+.site-card:nth-child(6) { animation-delay: 0.3s; }
+.site-card:nth-child(7) { animation-delay: 0.35s; }
+
+@keyframes siteCardIn {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.site-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 24px rgba(0,0,0,0.07);
+  border-color: var(--card-accent, var(--accent));
+}
+
+[data-theme="dark"] .site-card:hover {
+  box-shadow: 0 6px 24px rgba(0,0,0,0.25);
+}
+
+.site-card-tag {
+  font-family: 'Outfit', sans-serif;
+  font-size: 0.6rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--card-accent, var(--accent));
+  margin-bottom: 0.5rem;
+}
+
+.site-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin-bottom: 0.45rem;
+}
+
+.site-card-name {
+  font-family: 'Outfit', sans-serif;
+  font-weight: 600;
+  font-size: 1.05rem;
+  color: var(--primary);
+}
+
+.site-card-badge-new {
+  font-family: 'Outfit', sans-serif;
+  font-size: 0.6rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #fff;
+  background: var(--accent);
+  padding: 0.15rem 0.5rem;
+  border-radius: 99px;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.site-card-badge {
+  font-family: 'Outfit', sans-serif;
+  font-size: 0.7rem;
+  font-weight: 500;
+  color: var(--secondary);
+  background: var(--accent-soft);
+  padding: 0.15rem 0.55rem;
+  border-radius: 99px;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.site-card-desc {
+  font-family: 'Outfit', sans-serif;
+  font-size: 0.85rem;
+  line-height: 1.5;
+  color: var(--secondary);
+  margin: 0;
+}
+
+.site-card-role {
+  font-family: 'Outfit', sans-serif;
+  font-size: 0.7rem;
+  font-weight: 500;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--secondary);
+  margin-top: 0.6rem;
+  display: inline-block;
+  background: var(--theme, #fff);
+  border: 1px solid var(--tertiary, #e0ddd8);
+  border-radius: 99px;
+  padding: 0.1rem 0.6rem;
+}
+
+/* ── Pill & button helpers ── */
+.site-pill {
+  font-family: 'Outfit', sans-serif;
+  font-size: 0.85rem;
+  font-weight: 500;
+  padding: 0.45rem 1.2rem;
+  border: 1px solid var(--tertiary, #e0ddd8);
+  border-radius: 99px;
+  color: var(--primary);
+  background: var(--entry, #f8f7f4);
+  display: inline-block;
+}
+
+.site-btn {
+  font-family: 'Outfit', sans-serif;
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--accent) !important;
+  text-decoration: none !important;
+  padding: 0.45rem 1.3rem;
+  border: 1.5px solid var(--accent);
+  border-radius: 99px;
+  transition: background 0.2s ease, color 0.2s ease;
+  display: inline-block;
+}
+
+.site-btn:hover {
+  background: var(--accent);
+  color: #fff !important;
+}
+
+[data-theme="dark"] .site-btn:hover {
+  color: #1a1a1a !important;
+}
+
+.site-btn:visited { color: var(--accent) !important; }
+</style>
