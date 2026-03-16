@@ -32,7 +32,7 @@ title: "Jacob Silterra"
 <div>
 
 <p class="about-intro">
-I'm an ML engineer with over fifteen years of experience in computational biology and machine learning. My work spans multiple domains, from genomics and protein structure prediction to computer vision. I'm driven by the belief that machine learning can meaningfully improve how we diagnose, treat, and understand disease.
+I'm an AI/ML engineer with over fifteen years of experience in life sciences. My work spans multiple domains, from genomics and protein structure prediction to computer vision. I'm driven by the belief that computational methods can meaningfully improve how we understand, diagnose, and treat disease.
 </p>
 
 <div class="site-section-title">Tools & Libraries</div>
