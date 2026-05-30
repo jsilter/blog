@@ -1,9 +1,13 @@
 ---
-title: "Benchmarking Protein Ensemble Generators"
-date: 2026-05-25
+title: Benchmarking Protein Ensemble Generators
+date: 2026-05-31
 draft: true
-tags: ["structural-biology", "machine-learning", "protein-structure", "benchmarks"]
-summary: "Generative models for protein conformational ensembles are arriving monthly, but the field has no neutral cross-model comparison. A tour of why ensemble evaluation is hard and where the methods landscape sits today."
+tags:
+  - structural-biology
+  - machine-learning
+  - protein-structure
+  - benchmarks
+summary: Generative models for protein conformational ensembles are arriving monthly, but the field has no neutral cross-model comparison. A tour of why ensemble evaluation is hard and where the methods landscape sits today.
 ---
 
 <!-- TODO: hook / opening section (why ensembles matter; what AlphaFold didn't solve) -->
@@ -21,13 +25,24 @@ By minimizing the average error against multiple datapoints we end up with somet
 
 (Image credit [DiffDock](https://www.youtube.com/watch?v=_KBqVh6YbgI)) For image generators we can settle for realistic generation. While we definitely care about mode collapse ("smiling face" shouldn't just generate 20-year-old American white guys, there should be a range) so some diversity is required, we don't need to cover the complete distribution of all possible images for a given caption.
 
-Proteins are different. If we want to understand the full spectrum of activity for a given protein, we need to know the full spectrum of conformations. <!--That rare binding pocket I think I heard about?-->  Models like AlphaFold3 and Boltz are diffusion based, so the architecture supports sampling multiple structures. However, these models were trained against target structures from the PDB. Not ensembles, single structures. So while the architecture might support
+Proteins are different. If we want to understand the full spectrum of activity for a given protein, we need to know the full spectrum of conformations. <!--That rare binding pocket I think I heard about?-->  Models like AlphaFold3 and Boltz are diffusion based, so the architecture supports sampling multiple structures. However, these models were trained against target structures from the PDB. Not ensembles, single structures. The neural network architecture supports ensemble generation, and other methods modified the training method to do so.
 
 ## Ensemble Generators
 
 These have received less press (and certainly no Nobel prizes...yet) but I think this family will be much more important in the long run. These models attempt a much harder task: instead of just sampling some elements, we wish to cover the entire distribution. 
 
-A typical diffusion method involves learning to reverse added noise by learning a score function. The score function is typically a deep neural network, using some combination of convolution and attention layers.
+| Method                          | Approach                                     | Reference                                                                          |
+| ------------------------------- | -------------------------------------------- | ---------------------------------------------------------------------------------- |
+| AlphaFlow / ESMFlow             | Flow matching on AlphaFold2 / ESMFold        | [Jing et al., ICML 2024](https://arxiv.org/abs/2402.04845)                         |
+| ConfDiff                        | Diffusion with force guidance                | [Wang et al., ICML 2024](https://arxiv.org/abs/2403.14088)                         |
+| Str2Str                         | Zero-shot diffusion                          | [Lu et al., ICLR 2024](https://arxiv.org/abs/2306.03117)                           |
+| ESMDiff                         | Masked diffusion over structural tokens      | [Lu et al., ICLR 2025](https://arxiv.org/abs/2410.18403)                           |
+| Distributional Graphormer (DiG) | Diffusion (Graphormer backbone)              | [Zheng et al., Nature MI 2024](https://www.nature.com/articles/s42256-024-00837-3) |
+| BioEmu                          | Diffusion (large-scale equilibrium emulator) | [Lewis et al., Science 2025](https://www.science.org/doi/10.1126/science.adv9817)  |
+
+Like AlphaFold before them, most of these use diffusion, the major exception being AlphaFlow. I won't dig into the neural network structure here because I think it's less important than the evaluation metrics and training datasets.
+
+<!--A typical diffusion method involves learning to reverse added noise by learning a score function. The score function is typically a deep neural network, using some combination of convolution and attention layers.
 
 ![[Pasted image 20260530140113.png]]
 
@@ -35,7 +50,9 @@ Source: Score-Based Generative Modeling through Stochastic Differential Equation
 
  So basically guess and check. We need a function capable of the "check" step, which is no easy task, but conceptually we just pick random directions and our function says "hot" or "cold". 
 
-Flow matching is an alternative to diffusion. Instead of learning a score function, we learn an entire vector field capable of transitioning a sample from one distribution (ie noisy random) to another (ie our prediction). As stated, learning such a function is intractable, but with some clever mathematics we can approximate it.
+Flow matching is an alternative to diff usion. Instead of learning a score function, we learn an entire vector field capable of transitioning a sample from one distribution (ie noisy random) to another (ie our prediction). As stated, learning such a function is intractable, but with some clever mathematics we can approximate it.
+
+Two of the most prominent methods in this family are AlphaFlow and BioEmu; the former uses flow matching and the latter uses diffusion. Either technique can be used -->
 
 <!--But that's not really the advantage; diffusion models could be trained against ensemble models as well. The special advantage was in the training data; AlphaFlow was trained against [ATLAS](https://www.dsimb.inserm.fr/ATLAS/about.html), a dataset of protein structures calculate from molecular dynamics. Ensemble prediction methods lose the explicit timing dynamics from MD and instead treat -->
 
@@ -72,6 +89,9 @@ We are dealing with biological molecules here, so it makes sense to consider the
 
 Source: Bowen Jing, Bonnie Berger, and Tommi Jaakkola. "AlphaFold Meets Flow Matching for Generating Protein Ensembles." In Forty-first International Conference on Machine Learning (ICML), 2024. https://arxiv.org/abs/2402.04845
 
+## State of the Field: Methods
+
+
 <!--AI Generated
 The metric landscape sorts into four buckets that measure different things.
 
@@ -86,6 +106,7 @@ The metric landscape sorts into four buckets that measure different things.
 **Thermodynamic and kinetic readouts.** BioEmu pushes into territory the AlphaFlow panel doesn't touch: folding ΔG, mutation ΔΔG, cryptic-pocket recovery rates. These need reference data (experimental stability, kinetics-resolved MD) that ATLAS doesn't provide.
 
 ProteinBench (Wang et al., 2024) attempts a holistic survey across all of these, but it's a survey rather than a head-to-head: it doesn't run every model on identical inputs and report a single ranking. The AlphaFlow panel is the closest thing the field has to a shared standard, and even that is essentially one paper's choice that the next two papers adopted.
+-->
 
 ## The Problem: Generators Outpacing Evaluation
 
@@ -108,6 +129,8 @@ A few things make this harder than it looks.
 **Training-set contamination is real but invisible.** AlphaFlow-MD is trained on ATLAS and is scored on ATLAS. ANewSampling treats ATLAS as held-out. BioEmu trained on a huge MD + AFDB + stability corpus whose overlap with ATLAS is unclear. No paper surfaces this on the same plot.
 
 The headline rankings in each paper bake in all four of these choices.
+
+<!-- Generators tour, draw from when filling the Methods section above
 
 ## State of the Field: Generators
 
