@@ -10,24 +10,25 @@ tags:
 summary: Generative models for protein conformational ensembles are arriving monthly, but the field has no neutral cross-model comparison. A tour of why ensemble evaluation is hard and where the methods landscape sits today.
 ---
 
-<!-- TODO: hook / opening section (why ensembles matter; what AlphaFold didn't solve) -->
-## One Structure Isn't Everything
+# Introducing Premval
 
-![[Pasted image 20260525200646.png|399]]
+Premval (PRotein ENseMble eVALuation) is a neutral, openly published leaderboard for generative models that predict protein conformational ensembles. It scores every model against the same reference data (the ATLAS molecular dynamics set), through the same fixed panel of metrics, and labels which models were trained on that data, so you can tell genuine generalization from a model grading its own homework. The aim is to make a stream of monthly new methods comparable, and to answer a question the field currently can't: given a protein, which generator should you actually use?
 
-Classical regression models select a single best answer, often the maximum-likelihood estimate. For many situations this is exactly what we want, or at least good enough. But for many complex outputs it very much is not. Some of the first image generators were variational autoencoders and often had this same failure mode:
+# Beyond a Single Fold
 
-![[Pasted image 20260525201031.png|187]]
+Not too long ago, AlphaFold changed everything. And then AlphaFold2 changed everything again. And then AlphaFold3 changed everything again. Now with just a protein sequence, a database of MSAs, and a pile of GPUs we can cure all disease. Except not really.
 
-By minimizing the average error against multiple datapoints we end up with something unrealistic. Diffusion models handle this issue more elegantly:
+AlphaFold3 is excellent at solving fixed structures for well-behaved protein monomers which have many homologs so we can build a deep multiple-sequence alignment (MSA). This still leaves some gaps.
 
-![[Pasted image 20260525201425.png|273]]
+1. Proteins without many relatives
+2. Protein complexes (multimers, protein-protein interactions).
+3. Proteins with some flexbility in the structure
 
-(Image credit [DiffDock](https://www.youtube.com/watch?v=_KBqVh6YbgI)) For image generators we can settle for realistic generation. While we definitely care about mode collapse ("smiling face" shouldn't just generate 20-year-old American white guys, there should be a range) so some diversity is required, we don't need to cover the complete distribution of all possible images for a given caption.
+The first two are an issue with training data. Presumably if we had enough data from "orphan" proteins and from protein complexes we could train models (both single and ensemble) to predict such things.
 
-Proteins are different. If we want to understand the full spectrum of activity for a given protein, we need to know the full spectrum of conformations. <!--That rare binding pocket I think I heard about?-->  Models like AlphaFold3 and Boltz are diffusion based, so the architecture supports sampling multiple structures. However, these models were trained against target structures from the PDB. Not ensembles, single structures. The neural network architecture supports ensemble generation, and other methods modified the training method to do so.
+Ensemble generation explicitly addresses point #3; flexibility and motion. Instead of limiting ourselves to a single structure we identify the distribution. That is, generate hundreds or thousands of different structures which (hopefully) cover the distribution. Note that these methods do *not* predict explicit dynamics, as one gets from a molecular dynamics simulation. Rather they predict the set of structures we expect a protein to inhabit. Placing them in assuming chronological order is a common post-processing step. 
 
-## Ensemble Generators
+# A Sample of Ensemble Generators
 
 These have received less press (and certainly no Nobel prizes...yet) but I think this family will be much more important in the long run. These models attempt a much harder task: instead of just sampling some elements, we wish to cover the entire distribution. 
 
@@ -40,23 +41,17 @@ These have received less press (and certainly no Nobel prizes...yet) but I think
 | Distributional Graphormer (DiG) | Diffusion (Graphormer backbone)              | [Zheng et al., Nature MI 2024](https://www.nature.com/articles/s42256-024-00837-3) |
 | BioEmu                          | Diffusion (large-scale equilibrium emulator) | [Lewis et al., Science 2025](https://www.science.org/doi/10.1126/science.adv9817)  |
 
-Like AlphaFold before them, most of these use diffusion, the major exception being AlphaFlow. I won't dig into the neural network structure here because I think it's less important than the evaluation metrics and training datasets.
+Several of the methods above incorporate molecular dynamics (MD) training datasets by simply treating them as independent possible outputs. That is, a protein with 300 structures calculated by molecular dynamics would be 300 possible target structures for the same input sequence. The model never sees the time-ordering; the frames are treated as independent samples from the protein's structure distribution. 
 
-<!--A typical diffusion method involves learning to reverse added noise by learning a score function. The score function is typically a deep neural network, using some combination of convolution and attention layers.
+# Why Premval
 
-![[Pasted image 20260530140113.png]]
+Six methods, six papers, six tables. Each one reports its own numbers on its own chosen proteins with its own favorite metrics. One scores a handful of well-studied proteins, another scores a few hundred; one likes RMSF correlation, another likes Wasserstein distances. So "state of the art" usually just means "best in the table the authors built." Not very satisfying.
 
-Source: Score-Based Generative Modeling through Stochastic Differential Equations https://arxiv.org/abs/2011.13456
+It gets worse. Several of these models trained on molecular dynamics data and then got evaluated on molecular dynamics data from the same place. When AlphaFlow-MD is scored on ATLAS proteins it was fine-tuned on, a nice number is partly memorization, and nothing in the paper tells you how much.
 
- So basically guess and check. We need a function capable of the "check" step, which is no easy task, but conceptually we just pick random directions and our function says "hot" or "cold". 
+So Premval is the neutral ground nobody had bothered to build. Every model runs against the same proteins (ATLAS), through the same metrics, with a label on each one for whether it saw that data in training. One leaderboard, same rules for everybody, and "graded its own homework" is a column instead of something you have to dig out of a methods section. The rest of this post is about the metrics, because that is where the real work happens.
 
-Flow matching is an alternative to diff usion. Instead of learning a score function, we learn an entire vector field capable of transitioning a sample from one distribution (ie noisy random) to another (ie our prediction). As stated, learning such a function is intractable, but with some clever mathematics we can approximate it.
-
-Two of the most prominent methods in this family are AlphaFlow and BioEmu; the former uses flow matching and the latter uses diffusion. Either technique can be used -->
-
-<!--But that's not really the advantage; diffusion models could be trained against ensemble models as well. The special advantage was in the training data; AlphaFlow was trained against [ATLAS](https://www.dsimb.inserm.fr/ATLAS/about.html), a dataset of protein structures calculate from molecular dynamics. Ensemble prediction methods lose the explicit timing dynamics from MD and instead treat -->
-
-## State of the Field: Metrics
+# Metrics
 
 Individual structure prediction methods compare one single structure to another. In the simplest case we have a single protein which is a linear string of standard amino acids, each of which has standard notations for every atom. We align the two via rotation and translation to minimize the root-mean-squared deviation (RMSD), and start comparing. RMSD itself is the simplest and most obvious metric. There are more to choose from. The LDDT (local distance-difference test) which operates on the distogram level, and thus does not require a global alignment. Also the much more general template modelling score (TM-score), which *is* a global alignment, and allows us to compare non-equivalent proteins .
 
@@ -85,86 +80,32 @@ This one is a bit more complicated. First, a PCA is performed on the $C\alpha$ p
 ### Physical Validity
 
 We are dealing with biological molecules here, so it makes sense to consider the actual physical interactions. AlphaFlow introduced "weak and transient contacts":
-> defined as those Cα pairs which are in contact (respectively, not in contact) in the crystal structure but which dissociate (respectively, associate) in > 10% of ensemble structures, with a 8 ˚A threshold
+> defined as those Cα pairs which are in contact (respectively, not in contact) in the crystal structure but which dissociate (respectively, associate) in > 10% of ensemble structures, with a 8 Å threshold
 
-Source: Bowen Jing, Bonnie Berger, and Tommi Jaakkola. "AlphaFold Meets Flow Matching for Generating Protein Ensembles." In Forty-first International Conference on Machine Learning (ICML), 2024. https://arxiv.org/abs/2402.04845
+Source: Jing et al., ICML 2024 (AlphaFlow)
 
-## State of the Field: Methods
+### Root-Mean-Squared Fluctuation Correlation
+
+The root-mean-squared fluctuation (RMSF) is a measure of motion. We simply measure the root-mean-squared distance of an atom from its mean. The metric is the Pearson correlation between the fluctuation numbers of the candidate ensemble vs the reference (either all-heavy-atom or $C\alpha$). 
+
+### Thermodynamic and kinetic readout
+
+BioEmu reported thermodynamic stability metrics as well: folding ΔG, mutation ΔΔG, cryptic-pocket recovery rates. These need reference data (experimental stability, kinetics-resolved MD) that ATLAS doesn't provide, so they aren't present in most published methods, and they are not present in Premval.
 
 
-<!--AI Generated
-The metric landscape sorts into four buckets that measure different things.
+<!--
+# One Structure Isn't Everything
 
-**Flexibility.** Per-residue RMSF correlation (Pearson r between model and MD) is the single most-reported number in the field. It tells you whether your model is wiggling the right residues, but it's invariant to whether those wiggles have the right *shape* in 3D.
+![[Pasted image 20260525200646.png|399]]
 
-**Distributional accuracy.** AlphaFlow's contribution to the field's metric vocabulary is the Root Mean Wasserstein Distance (RMWD), a per-atom 2-Wasserstein between Gaussian fits, plus the MD-PCA Wasserstein-2 (project both ensembles into a PCA basis fit to MD, take EMD). These actually measure whether the *distribution* of conformations matches, not just per-residue variance. ConfDiff and ESMDiff prefer Jensen-Shannon divergences on pairwise Cα distances, Rg, and TIC components; broadly the same idea in a different basis.
+Classical regression models select a single best answer, often the maximum-likelihood estimate. For many situations this is exactly what we want, or at least good enough. But for many complex outputs it very much is not. Some of the first image generators were variational autoencoders and often had this same failure mode:
 
-**Ensemble observables.** AlphaFlow added the weak/transient contact Jaccard (which crystal contacts dissociate? which non-crystal contacts form?) and the exposed-residue Jaccard. These do real work: they separate collapsed-into-the-crystal models from models that actually sample apo/holo or fold-switching behavior.
+![[Pasted image 20260525201031.png|187]]
 
-**Physical validity.** Per-frame realism: clash rate, peptide-bond geometry, Ramachandran allowed-region fraction. ProteinBench surfaces these prominently; the alignment-on-top methods (EBA, EPO) treat them as a reward signal.
+By minimizing the average error against multiple datapoints we end up with something unrealistic. Diffusion models handle this issue more elegantly:
 
-**Thermodynamic and kinetic readouts.** BioEmu pushes into territory the AlphaFlow panel doesn't touch: folding ΔG, mutation ΔΔG, cryptic-pocket recovery rates. These need reference data (experimental stability, kinetics-resolved MD) that ATLAS doesn't provide.
+![[Pasted image 20260525201425.png|273]]
 
-ProteinBench (Wang et al., 2024) attempts a holistic survey across all of these, but it's a survey rather than a head-to-head: it doesn't run every model on identical inputs and report a single ranking. The AlphaFlow panel is the closest thing the field has to a shared standard, and even that is essentially one paper's choice that the next two papers adopted.
--->
+(Image credit [DiffDock](https://www.youtube.com/watch?v=_KBqVh6YbgI)) For image generators we can settle for realistic generation. While we definitely care about mode collapse ("smiling face" shouldn't just generate 20-year-old American white guys, there should be a range) so some diversity is required, we don't need to cover the complete distribution of all possible images for a given caption.
 
-## The Problem: Generators Outpacing Evaluation
-
-The protein conformational ensemble field is in a stampede. AlphaFlow, ESMFlow, BioEmu, ConfDiff, Str2Str, ESMDiff, DiG, ANewSampling, JAMUN, EBA, EPO; new bioRxiv entries appear every month. Each paper benchmarks its own model on its own targets, often with its own bespoke metric panel.
-
-There is no neutral cross-model comparison. Numbers in different papers aren't apples-to-apples, and the closest thing the field has to a shared evaluation (AlphaFlow's `analyze_ensembles.py` panel) is rarely run against models the AlphaFlow authors didn't release themselves.
-
-This gap is real and undersupplied; a public, reproducible head-to-head comparison would let practitioners actually choose a model.
-
-## Why Evaluation Is Hard
-
-A few things make this harder than it looks.
-
-**Reference data is heterogeneous.** ATLAS gives you standardized 3 × 100 ns CHARMM36m simulations across ~1,400 proteins, which is the closest thing to a canonical MD dataset. PED (Protein Ensemble Database) is the cleanest source of disordered-protein ensembles, mostly experimental. mdCATH ships 3.6 TB of simulations. DESRES fast-folders are smaller but kinetics-resolved. Beyond these, most papers cite their own bespoke MD.
-
-**Metrics span families that don't substitute for each other.** Flexibility metrics (per-residue RMSF correlation) tell you whether the model is wiggling the right loops. Distributional metrics (RMWD, MD-PCA Wasserstein) measure whether the *shape* of the ensemble matches MD. Ensemble observables (contact Jaccard, exposed-residue analysis) measure whether functionally relevant motions are captured. Validity metrics (clashes, peptide-bond geometry, Ramachandran) measure whether per-frame samples are physically reasonable. Thermodynamic readouts (ΔG, ΔΔG) and kinetic ones (TICA divergences) require fundamentally different reference data.
-
-**Sample counts matter, and most papers don't normalize.** AlphaFlow's README is explicit that its results "are not comparable across different sample counts." Quoting metrics from two papers that sampled differently is a category error.
-
-**Training-set contamination is real but invisible.** AlphaFlow-MD is trained on ATLAS and is scored on ATLAS. ANewSampling treats ATLAS as held-out. BioEmu trained on a huge MD + AFDB + stability corpus whose overlap with ATLAS is unclear. No paper surfaces this on the same plot.
-
-The headline rankings in each paper bake in all four of these choices.
-
-<!-- Generators tour, draw from when filling the Methods section above
-
-## State of the Field: Generators
-
-A short tour, organized by methodological family. (I'll skip historical baselines like idpGAN and EigenFold; the action is in the last two years.)
-
-**Flow-matching on single-state predictors.** AlphaFlow and ESMFlow (Jing et al., ICML 2024) take AlphaFold2 and ESMFold respectively and fine-tune them under a flow-matching objective, turning a deterministic predictor into a sequence-conditioned generator. The MD-trained variants (AlphaFlow-MD, ESMFlow-MD) are further fine-tuned on ATLAS. Their evaluation script (`analyze_ensembles.py`) has become the de facto reference panel for the field, and their 250-frame multi-model PDB outputs on HuggingFace are the closest thing to a community baseline.
-
-**SE(3) diffusion.** ConfDiff (Wang et al., ICML 2024) is an SE(3) diffusion model over backbone frames with a force-guided score combination, so samples track the Boltzmann distribution; it ships an ATLAS-fine-tuned checkpoint. Str2Str (Lu et al., ICLR 2024) is the zero-shot variant: trained only on PDB crystals, no MD data required, samples by perturbing-and-denoising an input structure.
-
-**Structure language models.** ESMDiff (Lu et al., ICLR 2025) encodes 3D structures into a discrete latent and does masked diffusion over those tokens, on top of ESM3. Reports 20-100× speedup over continuous-coordinate diffusion methods. The catch: ESM3's weights are gated behind a non-commercial license, which constrains downstream use.
-
-**Equilibrium emulators at scale.** BioEmu (Lewis, Hempel, Jiménez-Luna, et al., Science 2025) is the most ambitious. The authors integrated >200 ms of MD plus PDB/AFDB statics plus experimental stability data into a single emulator that generates thousands of independent structures per hour on one GPU. It reports relative free energies to ~1 kcal/mol and predicts cryptic-pocket and conformational-change behavior; the readouts go well beyond the AlphaFlow geometry panel.
-
-**Distributional Graphormer (DiG).** Microsoft's earlier line (Zheng et al., Nature MI 2024), a diffusion model conditioned on a system descriptor; scope broader than proteins (also catalysts and ligand poses). The trained-weights link expired in April 2025, so in practice DiG is currently unusable from outside the original team.
-
-**Physical-feedback alignment.** EBA (Lu et al., ICML 2025) and EPO (Sun et al., AAAI 2026) aren't standalone generators but DPO-style alignment layers that fine-tune an existing generator (Protenix base for EBA, MDGen for EPO) with an energy-based preference signal. EBA's checkpoint and a 250-sample artifact are live; EPO's GitHub repo is currently an empty placeholder.
-
-A practical map of what's actually usable today:
-
-| Method | Pre-generated ensembles | Weights runnable | License |
-|---|---|---|---|
-| AlphaFlow / ESMFlow | Yes (HF, multi-model PDB) | Yes | MIT |
-| ConfDiff | No (generate yourself) | Yes | Apache-2.0 |
-| Str2Str | No | Yes | MIT |
-| ESMDiff | No | Partial (ESM3 gated) | Non-commercial |
-| BioEmu | No (benchmark harness exists) | Yes | MIT |
-| EBA | Partial (250 test samples) | Yes | MIT + Apache-2.0 |
-| DiG | No | Effectively no (weights link dead) | Unstated |
-| EPO | No | No (empty repo) | MIT (declared) |
-
-If you wanted to compare these head-to-head today, AlphaFlow and ESMFlow are the only ones where you can skip the inference step entirely.
-
--->
-
-<!-- TODO: section on contamination as the hidden killer -->
-<!-- TODO: PREMVAL teaser / what I'm building -->
-<!-- TODO: open questions and caveats -->
+Proteins are different. If we want to understand the full spectrum of activity for a given protein, we need to know the full spectrum of conformations. Models like AlphaFold3 and Boltz are diffusion based, so the architecture supports sampling multiple structures. However, these models were trained against target structures from the PDB. Not ensembles, single structures. The neural network architecture supports ensemble generation, and other methods modified the training method to do so.
