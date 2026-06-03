@@ -3,3 +3,7 @@ resources/_gen/
 .hugo_build.lock
 content/.obsidian/
 .ignored
+
+CLAUDE.md
+AGENTS.md
+
