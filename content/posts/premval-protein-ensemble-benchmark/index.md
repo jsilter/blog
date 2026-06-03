@@ -1,7 +1,7 @@
 ---
 title: Benchmarking Protein Ensemble Generators
-date: 2026-05-31
-draft: true
+date: 2026-06-02
+draft: false
 tags:
   - structural-biology
   - machine-learning
@@ -62,11 +62,11 @@ Ensembles have their own difficulties. Thankfully we have decades of mathematics
 
 By far the most popular tool for comparing distributions is the [Wasserstein Metric](https://en.wikipedia.org/wiki/Wasserstein_metric), also called the Earth Mover's Distance. $W_1$ asks what is the least amount of "mass" we would need to move from one place to another to convert one distribution $p_1$ to another $p_2$. It is defined in any number of dimensions, although defined does not mean easy to calculate. However, the $W_2$ distance between Gaussian distributions has a nice closed form:
 $$
-W^2_2 (X_0, X_1) = (μ_0 − μ_1)^2 + (σ_0 − σ_1)^2 
+W^2_2 (X_0, X_1) = (\mu_0 - \mu_1)^2 + (\sigma_0 - \sigma_1)^2 
 $$
 The above formula is for a single dimension. In many dimensions it gets a bit more complicated, but basically the scalars turn into matrices:
 $$
-W^2_2 (X_0, X_1) = ||\vec{μ_0} − \vec{μ_1}||^2 + Tr(\Sigma_0 + \Sigma_1 - 2(\Sigma_0^{1/2} \Sigma_1 \Sigma_0^{1/2})^{1/2} )
+W^2_2 (X_0, X_1) = ||\vec{\mu_0} - \vec{\mu_1}||^2 + \mathrm{Tr}(\Sigma_0 + \Sigma_1 - 2(\Sigma_0^{1/2} \Sigma_1 \Sigma_0^{1/2})^{1/2} )
 $$
 AlphaFlow introduced a metric based on this formula which the authors called the *root mean Wasserstein distance* (RMWD), which consists of a few pieces:
 1. Let $\mathcal{N}[X_i]$ be the set of Gaussians fit to the positional distribution of each atom $i$ in one ensemble $X$, and say we are comparing to another ensemble $Y$.
@@ -96,7 +96,7 @@ BioEmu reported thermodynamic stability metrics as well: folding ΔG, mutation �
 
 ## So Which Generator Should You Use?
 
-The best-performing model on this benchmark is AlphaFlow-MD, though you can achieve results much faster and almost as good with ESMFlow-MD-distilled. The comparison is difficult mainly because these models were trained on ATLAS and evaluated on a held-out ATLAS subset. While there was no explicit sample overlap, one expects a similar distribution of data. As compared to BioEmu, which was trained on a more complicated dataset, and which means it is less similar to the ATLAS training set. Which method is better for your situation is unclear. I realize this is an unsatisfying answer, ultimately it underscores the need for evaluation datasets which are distinct from training datasets. 
+The top model on this benchmark is AlphaFlow-MD, with AlphaFlow-MD-distilled close behind and much faster. But read that ranking carefully: both were trained on ATLAS and evaluated on a held-out ATLAS subset. No explicit sample overlap, but a very similar distribution, so some of that lead is familiarity rather than skill. BioEmu trained on a broader dataset further from ATLAS, which makes its lower score the more honest one. Which model is actually best for your protein is unclear, and that is the point: we need evaluation sets genuinely distinct from training sets.
 
-In the meantime, I just report the facts we have. Premval reports the whole panel on the same proteins, with a contamination label next to each model so you can tell generalization from memorization. Look for yourself: [the Premval leaderboard](LEADERBOARD_URL).
+In the meantime, I just report the facts we have. Premval reports the whole panel on the same proteins, with a contamination label next to each model so you can tell generalization from memorization. Look for yourself: [the Premval leaderboard](https://premval--web.modal.run/). The code (website and score calculations) is available at [github.com/jsilter/premval](https://github.com/jsilter/premval).
 
