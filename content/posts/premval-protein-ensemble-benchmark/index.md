@@ -2,6 +2,7 @@
 title: Benchmarking Protein Ensemble Generators
 date: 2026-06-02
 draft: false
+math: true
 tags:
   - structural-biology
   - machine-learning
