@@ -12,6 +12,14 @@
   url: "https://github.com/gcorso/DiffDock"
   featured: true
 
+- name: "Premval"
+  description: "Neutral leaderboard for protein conformational ensemble generators, scored on a fixed metric panel over the ATLAS molecular dynamics set."
+  role: "Author"
+  category: "Structural Biology"
+  url: "https://premval--web.modal.run/"
+  new: true
+  featured: true
+
 - name: "Parametric DR"
   description: "PyTorch library for parametric dimensionality reduction: t-SNE, UMAP, PaCMAP, TriMap, and CEBRA under a single API."
   role: "Author"
